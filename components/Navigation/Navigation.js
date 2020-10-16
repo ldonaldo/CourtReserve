@@ -10,17 +10,13 @@ const Navigation = () => {
   const {state } = React.useContext(AuthContext)
   const [index, setIndex] = useState(0);
   console.log(state)
-  const [ routes ] = useState( state.userToken === null ? 
-    [      
+  const  routes  =  state.userToken === null ? ( [   
       { key: 'login', title: 'Login', icon: 'login'},
-      { key: 'register', title: 'Register', icon: 'account-plus'}
-    ] : 
-    [   
-      { key: 'login', title: 'Login', icon: 'login'},
-      { key: 'register', title: 'Register', icon: 'account-plus'},
-      { key: 'logout', title: 'Logout', icon: 'logout'}   
-    ]
-  );
+      { key: 'register', title: 'Register', icon: 'account-plus'} 
+    ])
+    : ([
+      { key: 'logout', title: 'Logout', icon: 'logout'}    
+    ])
 
   const loginRoute = () => <Login />
   const registerRoute = () => <Register />

@@ -1,18 +1,31 @@
-import React from 'react'
-import { Title, Text, Button, BottomNavigation} from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, {useEffect} from 'react';
+import { ScrollView } from 'react-native';
+import { Title, Text, Button, Card, Paragraph} from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import Logout from '../components/Logout/Logout';
-import Navigation from '../components/Navigation/Navigation';
+import { getAllCourts } from '../utils/HTTPRequests';
+import Courts from '../components/Courts/Courts';
+import { AuthContext } from '../App';
+
 
 export default function Home({navigation}) {
+  const {state, authContext: {updateCourts} } = React.useContext(AuthContext)
+
+  useEffect(() => {
+    async function getCourts() {
+      try{
+        const getCourts = await getAllCourts()
+        updateCourts({ courts: getCourts.courts })
+      }
+      catch(err){
+        console.log(err)
+      }
+    }
+    getCourts();
+  },[])
+  
   return(
-    <>
-      {/*<Button icon="account-plus" title="Register User" mode="contained" onPress={() => navigation.navigate('Register')}>Register User</Button>
-      <Button icon="login" title="Login User" mode="contained" onPress={() => navigation.navigate('Login')}>Login User</Button>
-  <Logout /> */}
-      <Navigation />
+    <>      
+        <Courts courts={state.courts} />      
     </>
   )
 }

@@ -3,12 +3,9 @@ import { Title, TextInput, Button, Text, Avatar } from 'react-native-paper';
 import { View, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Home from './pages/Home';
-import RegisterForm from './components/Register/RegisterForm';
-import LoginForm from './components/Login/LoginForm';
-import Logout from './components/Logout/Logout';
 import AsyncStorage from '@react-native-community/async-storage';
-import Navigation from './components/Navigation/Navigation';
+import DrawerNavigation from './components/Navigation/DrawerNavigation';
+import TabNavigator from './components/Navigation/TabNavigator';
 
 const Stack = createStackNavigator();
 export const AuthContext = React.createContext();
@@ -37,12 +34,18 @@ export default function App ({navigation}) {
           userToken: null,
           userType: null
         };
+      case 'UPDATE_COURTS':
+        return {
+          ...prevState,
+          courts: action.courts  
+        } 
     }
   },{
     isLoading: true,
     isSignout: false,
     userToken: null,
-    userType: null
+    userType: null,
+    courts: []
   });
 
   useEffect(() =>{
@@ -52,7 +55,7 @@ export default function App ({navigation}) {
         userToken = await AsyncStorage.getItem('token')
         userType = await AsyncStorage.getItem('userType')
       } catch(err){
-
+        console.log(err)
       }
       dispatch({ type: 'RESTORE_TOKEN', token: userToken, userType: userType })
     };
@@ -67,7 +70,10 @@ export default function App ({navigation}) {
       signOut: () => dispatch({ type: 'SIGN_OUT'}),
       signUp: async data => {
         dispatch({ type: 'SIGN_IN', token: data.token, userType: data.userType})
-      }  
+      },
+      updateCourts: async data => {
+        dispatch({ type: 'UPDATE_COURTS', courts: data.courts })
+      } 
     }),
     []
   )
@@ -76,20 +82,9 @@ export default function App ({navigation}) {
   return(
     <AuthContext.Provider value={{state,authContext}}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">   
-          <Stack.Screen name="Home" component={Home} options={{ title: 'Home' }} />               
-          {state.userToken == null ?  
-          <>             
-            <Stack.Screen name="Register" component={RegisterForm} options={{ title: "Register" }} />
-            <Stack.Screen name="Login" component={LoginForm} options={{ title: 'Login User' }} /> 
-          </>
-          :
-          <>            
-            <Stack.Screen name="Logout" component={Logout} options={{ title: 'Logout User' }} /> 
-          </>
-          }
-        </Stack.Navigator>
+          <DrawerNavigation />
       </NavigationContainer>
+      
     </AuthContext.Provider>
   )  
 }
