@@ -4,8 +4,8 @@ import moment from 'moment';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const Court = ({court}) => {
-  const {title, address, pricePerHour, openingTime, closingTime} = court;  
+const Court = ({court, edit}) => {
+  const {title, address, pricePerHour, openingTime, closingTime, courtPhotos} = court;  
   const openingTimeMoment = moment().set({ hour: openingTime.split(":")[0], minute: openingTime.split(":")[1], second: 0, millisecond: 0});
   const closingTimeMoment = moment().set({ hour: closingTime.split(":")[0], minute: closingTime.split(":")[1], second: 0, millisecond: 0});
   const actualTime = moment()
@@ -58,11 +58,15 @@ const Court = ({court}) => {
           {isOpen ? <Chip  icon="bookmark-check">Abierto</Chip> : <Chip icon="close">Actualmente Cerrada</Chip> }
         </Card.Content>
         <Card.Actions style={styles.button}>
-          <Button icon="tennis-ball" mode="contained" onPress={() => navigation.navigate('CourtCalendar',{
-            court: court
-          })}>Reservar!</Button>
+          { edit ? <Button icon="tennis" mode="contained" onPress={() => navigation.navigate('CreateCourt',{
+            court: court,
+            edit: true
+          })}>Editar</Button> : <Button icon="tennis-ball" mode="contained" onPress={() => navigation.navigate('CourtCalendar',{
+            court: court,
+            edit: true
+          })}>Reservar!</Button>}
         </Card.Actions>
-        <Card.Cover style={styles.cover} source={{ uri: 'https://i.ibb.co/vPg8jzm/parqueraquetas.jpg' }} />
+        <Card.Cover style={styles.cover} source={{ uri: courtPhotos || 'https://i.ibb.co/vPg8jzm/parqueraquetas.jpg' }} />
       </Card>
     </View>
   )

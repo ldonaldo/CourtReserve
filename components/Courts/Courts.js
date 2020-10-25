@@ -2,17 +2,15 @@ import React from "react";
 import Court from './Court';
 import { ScrollView } from 'react-native';
 import {Title} from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 
-const Courts = ({ courts, navigation }) => {
-  const renderingCourts = courts.length > 0 && courts.map( court => (
-    <Court key={court._id} court={court} />
-  ))
+const Courts = ({ courts, edit }) => {
+  const renderingCourts = courts.length > 0 ? courts.map( court => (
+    <Court key={court._id} court={court} edit={edit} />
+  )) : <Title>No tiene espacios creados</Title>
   return (
     <>
       <ScrollView>
-        <Title>Vea todas las canchas existentes:</Title>
+        { edit ? <Title>Estos son sus espacios</Title> :  <Title>Vea todas las canchas existentes:</Title>}
         {renderingCourts}
       </ScrollView>
     </>  

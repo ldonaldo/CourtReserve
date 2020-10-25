@@ -12,9 +12,7 @@ const Logout = (navigation) => {
 
   const handleSubmit = async() => {
     setLoading(true)
-    console.log("logged out")
     const token = state.userToken
-    console.log(token)
     const userType = state.userType
     await logoutUser(userType,{token})
     signOut()

@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, ToastAndroid, ActivityIndicator } from 'react-native';
 import { Modal, IconButton, Text, Button, Colors, TextInput, Title, Card } from 'react-native-paper';
-import { Formik, Field, Form } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { getToken, payReservation, createReservation } from '../../utils/HTTPRequests';
 import { AuthContext } from '../../App';
+import { useNavigation } from '@react-navigation/native';
 
-const ModalPayment = ({navigation, selectedDate, court, selectedTime, displayButton, hideModal}) => {
+const ModalPayment = ({selectedDate, court, selectedTime, displayButton, hideModal}) => {
+  const navigation = useNavigation();
   const { state } = React.useContext(AuthContext)
   const {dateString, day, month, year} = selectedDate;
   const { _id, openingTime, closingTime, pricePerHour} = court; 
@@ -23,7 +25,7 @@ const ModalPayment = ({navigation, selectedDate, court, selectedTime, displayBut
       width: "80%",
       alignSelf: "center",
       elevation: 3,
-      marginBottom: 50
+      marginBottom: 200
     },
     input: {
       width: "80%",
@@ -95,7 +97,7 @@ const ModalPayment = ({navigation, selectedDate, court, selectedTime, displayBut
       /*const token = await getToken()
       console.log("token",token)*/
       const paymentResponse = await payReservation(values)
-      console.log("payment",paymentResponse.payment.status)
+      console.log("paymentResponse",paymentResponse)
       if (paymentResponse.payment.status) {
         let reserveValues = {};
         reserveValues.courtId = _id;
@@ -108,18 +110,24 @@ const ModalPayment = ({navigation, selectedDate, court, selectedTime, displayBut
         reserveValues.totalPrice = pricePerHour
         reserveValues.paidReserve = true;
         const result = await createReservation(reserveValues)
-        console.log(result)
         actions.setSubmitting(false) 
         showToastWithGravityAndOffset("Pago exitoso, Reserva confirmada") 
         dismissModal();
+        navigation.push('Home')
+      } else {
+        actions.setSubmitting(false) 
+        showToastWithGravityAndOffset("Ocurrió un error durante la transacción, Reserva cancelada")
+        dismissModal();
+        throw Error(paymentResponse.payment.data.errors[0].errorMessage)        
       }
     } catch(err){
       console.log(err)
       actions.setSubmitting(false) 
       showToastWithGravityAndOffset("Ocurrió un error durante la transacción, Reserva cancelada")
+      dismissModal();
+
     }
   }
-  console.log("state payment", state)
   return (    
       <Modal visible={displayButton} color={Colors.primary} onDismiss={dismissModal} style={styles.modal} > 
         {/*<View style={styles.modal}>*/}
@@ -129,36 +137,36 @@ const ModalPayment = ({navigation, selectedDate, court, selectedTime, displayBut
           <Title>Ingrese sus datos para el pago de la reserva</Title>
         </View>
         <Formik
-          initialValues={{ email: '', card_number: '4575623182290326', card_cvc: '', dues: '', name:'', last_name:'', card_exp_month: '', card_exp_year: '', cell_phone: '', city: '', address: '', doc_number: ''}} 
+          initialValues={{ email: '', card_number: '4575623182290326', card_cvc: '123', dues: '', name:'', last_name:'', card_exp_month: '12', card_exp_year: '2025', cell_phone: '', city: '', address: '', doc_number: ''}} 
           onSubmit={handleSubmit} validationSchema={FormSchema} >
-          {({handleChange, handleSubmit, values, errors, isSubmitting}) => (
+          {({handleChange, handleSubmit, handleBlur, values, touched, errors, isSubmitting}) => (
             <>
-              <TextInput label="Email" value={values.email} onChangeText={handleChange('email')} outlined placeholder="Ingrese el email" error={errors.email} style={styles.input} />
-              {errors.email ? <Text>{errors.email}</Text> : null}
-              <TextInput label="Nombre" value={values.name} onChangeText={handleChange('name')} outlined placeholder="Ingrese su nombre" error={errors.name} style={styles.input} />
-              {errors.name ? <Text>{errors.name}</Text> : null}     
-              <TextInput label="Apellidos" value={values.last_name} onChangeText={handleChange('last_name')} outlined placeholder="Ingrese sus apellidos" error={errors.last_name} style={styles.input} />
-              {errors.last_name ? <Text>{errors.last_name}</Text> : null}   
-              <TextInput label="Número de Tarjeta" value={values.card_number} onChangeText={handleChange('card_number')}  outlined placeholder="Ingrese su tarjeta" error={errors.card_number} style={styles.input} />
-              {errors.card_number ? <Text>{errors.card_number}</Text> : null} 
-              <TextInput label="Mes de Vencimiento" value={values.card_exp_month} onChangeText={handleChange('card_exp_month')} outlined placeholder="Ingrese el número de tarjeta" error={errors.card_exp_month} style={styles.input} />
-              {errors.card_exp_month ? <Text>{errors.card_exp_month}</Text> : null}    
-              <TextInput label="Año de Vencimiento" value={values.card_exp_year} onChangeText={handleChange('card_exp_year')} outlined placeholder="Ingrese el número de tarjeta" error={errors.card_exp_year} style={styles.input} />
-              {errors.card_exp_year ? <Text>{errors.card_exp_year}</Text> : null}         
-              <TextInput label="CVC" value={values.card_cvc} onChangeText={handleChange('card_cvc')} placeholder="Ingrese el CVC" error={errors.card_cvc} outlined style={styles.input}  />
-              {errors.card_cvc ? <Text>{errors.card_cvc}</Text> : null}
-              <TextInput label="Cuotas" value={values.dues} onChangeText={handleChange('dues')} outlined placeholder="Ingrese el número de Cuotas" error={errors.dues} style={styles.input} />
-              {errors.dues ? <Text>{errors.dues}</Text> : null}     
-              <TextInput label="Número de Móvil" value={values.cell_phone} onChangeText={handleChange('cell_phone')} outlined placeholder="Ingrese el numero de su móvil" error={errors.cell_phone} style={styles.input} />
-              {errors.cell_phone ? <Text>{errors.cell_phone}</Text> : null} 
-              <TextInput label="Ciudad" value={values.city} onChangeText={handleChange('city')} outlined placeholder="Ingrese el numero de su móvil" error={errors.city} style={styles.input} />
-              {errors.city ? <Text>{errors.city}</Text> : null}     
-              <TextInput label="Dirección" value={values.address} onChangeText={handleChange('address')} outlined placeholder="Ingrese el numero de su móvil" error={errors.address} style={styles.input} />
-              {errors.address ? <Text>{errors.address}</Text> : null}   
-              <TextInput label="Número de Documento" value={values.doc_number} onChangeText={handleChange('doc_number')} outlined placeholder="Ingrese el numero de su móvil" error={errors.doc_number} style={styles.input} />
-              {errors.doc_number ? <Text>{errors.doc_number}</Text> : null}
+              <TextInput label="Email" value={values.email} onChangeText={handleChange('email')} onBlur={handleBlur('email')} outlined placeholder="Ingrese el email" error={errors.email} style={styles.input} />
+              {touched.email && errors.email ? <Text>{errors.email}</Text> : null}
+              <TextInput label="Nombre" value={values.name} onChangeText={handleChange('name')} onBlur={handleBlur('name')} outlined placeholder="Ingrese su nombre" error={errors.name} style={styles.input} />
+              {touched.name && errors.name ? <Text>{errors.name}</Text> : null}     
+              <TextInput label="Apellidos" value={values.last_name} onChangeText={handleChange('last_name')} onBlur={handleBlur('last_name')} outlined placeholder="Ingrese sus apellidos" error={errors.last_name} style={styles.input} />
+              {touched.last_name && errors.last_name ? <Text>{errors.last_name}</Text> : null}   
+              <TextInput label="Número de Tarjeta" value={values.card_number} onChangeText={handleChange('card_number')} onBlur={handleBlur('card_number')} outlined placeholder="Ingrese su tarjeta" error={errors.card_number} style={styles.input} />
+              {touched.card_number && errors.card_number ? <Text>{errors.card_number}</Text> : null} 
+              <TextInput label="Mes de Vencimiento" value={values.card_exp_month} onChangeText={handleChange('card_exp_month')} onBlur={handleBlur('card_exp_month')} outlined placeholder="Ingrese el número de tarjeta" error={errors.card_exp_month} style={styles.input} />
+              {touched.card_exp_month && errors.card_exp_month ? <Text>{errors.card_exp_month}</Text> : null}    
+              <TextInput label="Año de Vencimiento" value={values.card_exp_year} onChangeText={handleChange('card_exp_year')} onBlur={handleBlur('card_exp_year')} outlined placeholder="Ingrese el número de tarjeta" error={errors.card_exp_year} style={styles.input} />
+              {touched.card_exp_year && errors.card_exp_year ? <Text>{errors.card_exp_year}</Text> : null}         
+              <TextInput label="CVC" value={values.card_cvc} onChangeText={handleChange('card_cvc')} onBlur={handleBlur('card_cvc')} placeholder="Ingrese el CVC" error={errors.card_cvc} outlined style={styles.input}  />
+              {touched.card_cvc && errors.card_cvc ? <Text>{errors.card_cvc}</Text> : null}
+              <TextInput label="Cuotas" value={values.dues} onChangeText={handleChange('dues')} onBlur={handleBlur('dues')} outlined placeholder="Ingrese el número de Cuotas" error={errors.dues} style={styles.input} />
+              {touched.dues && errors.dues ? <Text>{errors.dues}</Text> : null}     
+              <TextInput label="Número de Móvil" value={values.cell_phone} onChangeText={handleChange('cell_phone')} onBlur={handleBlur('cell_phone')} outlined placeholder="Ingrese el numero de su móvil" error={errors.cell_phone} style={styles.input} />
+              {touched.cell_phone && errors.cell_phone ? <Text>{errors.cell_phone}</Text> : null} 
+              <TextInput label="Ciudad" value={values.city} onChangeText={handleChange('city')} onBlur={handleBlur('city')} outlined placeholder="Ingrese el numero de su móvil" error={errors.city} style={styles.input} />
+              {touched.city && errors.city ? <Text>{errors.city}</Text> : null}     
+              <TextInput label="Dirección" value={values.address} onChangeText={handleChange('address')} onBlur={handleBlur('address')} outlined placeholder="Ingrese el numero de su móvil" error={errors.address} style={styles.input} />
+              {touched.address && errors.address ? <Text>{errors.address}</Text> : null}   
+              <TextInput label="Número de Documento" value={values.doc_number} onChangeText={handleChange('doc_number')} onBlur={handleBlur('doc_number')} outlined placeholder="Ingrese el numero de su móvil" error={errors.doc_number} style={styles.input} />
+              {touched.doc_number && errors.doc_number ? <Text>{errors.doc_number}</Text> : null}
               { isSubmitting ? spinner : null }  
-              {state.userType === "user" ? <Button disabled={isSubmitting} icon="send" mode="contained" onPress={handleSubmit} style={styles.button}>Pay Reserve</Button> : null}            
+              {state.userType === "user" ? <Button disabled={isSubmitting} icon="send" mode="contained" onPress={handleSubmit} style={styles.button}>Pagar</Button> : null}            
             </>            
           )}
           </Formik>  

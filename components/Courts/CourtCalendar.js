@@ -1,20 +1,24 @@
 import React, {useState, useEffect} from 'react';
 import { Title, Text, Button, RadioButton, Card, Paragraph, Provider, Portal, FAB} from 'react-native-paper';
 import { Agenda} from 'react-native-calendars';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, FlatList, StyleSheet } from 'react-native';
 import moment from 'moment';
 import ModalPayment from './ModalPayment';
 import { createReservation, getReservationsofDate, getMonthlyReservations } from '../../utils/HTTPRequests';
 import { AuthContext } from '../../App';
+import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   agenda: {
     marginBottom: 5
   },
   reserve: {
-    marginTop: 5,
+    marginTop: 50,
     marginLeft: 10,
-    marginRight: 10
+    marginRight: 10,
+    marginBottom: 50,
+    flex: 1,
+    minHeight: 1000
   },
   fab: {
     margin: 0,
@@ -22,11 +26,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignSelf: 'center',
     elevation: 1    
+  },
+  scrollView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0  
   }
 })
 
 const CourtCalendar = ({ route }) => {
   const { state } = React.useContext(AuthContext)
+  const navigation = useNavigation();
   const { court } = route.params
   const [selectedDate, setSelectedDate] = useState({
     dateString: moment().utcOffset('GMT-05:00').format("YYYY-MM-DD"),
@@ -43,12 +55,10 @@ const CourtCalendar = ({ route }) => {
     const { year} = selectedMonth
     async function getEvents(){
       const events = await getMonthlyReservations(court._id, year)
-      console.log("events",events.reservations)
       const newEvents = {};
       if (events.reservations && events.reservations.length > 0 ) {
         events.reservations.map(element => newEvents[element.date] = {marked: true}  )
       }
-      console.log(newEvents)
       setEvents(newEvents)
     }
     getEvents();
@@ -132,7 +142,7 @@ function AgendaView({selectedDate, court}) {
       <Card key={element.startTime}>
         <Card.Title title={`${element.startTime}-${element.endTime}`}></Card.Title>
         <Card.Content>
-          <Paragraph>Court reserved</Paragraph>
+          <Paragraph>Cancha Reservada</Paragraph>
         </Card.Content>
       </Card>
     )    
@@ -140,13 +150,12 @@ function AgendaView({selectedDate, court}) {
 
   const showRadioButtons = state.userType === "user" ? 
   <>
-    <Title>Select your hour </Title>
+    <Title>Seleccione la hora</Title>
     <RadioButton.Group onValueChange={value => {setShowButton(true);setSelectedTime(value)}} value={selectedTime}>
       {arrayOfHours}
     </RadioButton.Group> 
   </>  : <Title>Ingrese como usuario para reservar</Title>
   const hideModal = () => {
-    console.log("hide")
     setDisplayButton(false)
   }
 
@@ -154,15 +163,20 @@ function AgendaView({selectedDate, court}) {
   <>
     <ModalPayment selectedDate={selectedDate} court={court} selectedTime={selectedTime} displayButton={displayButton} hideModal={hideModal} />
   </> : null;
-  console.log("display button", displayButton)
   return (
     <>
-      <ScrollView>   
+      <ScrollView>  
         <View style={styles.reserve}>       
-          <Title>Reservations for: {day}-{month}-{year}</Title> 
+          <Title>Reservaciones del día: {day}-{month}-{year}</Title> 
           {dailyReservations.length > 0 ? null : <Text>No hay reservaciones para este día</Text> }
           { state.userType === "user" ? showRadioButtons : showReservations}    
-          {showButton && state.userType === "user" ? <FAB small  icon="plus"  animated={true} onPress={() => setDisplayButton(true)} style={styles.fab}></FAB> : state.userType === "user" ? <Title>Selecciona una hora para reservar</Title> :<Title>Ingrese como usuario para reservar</Title>}    
+          {showButton && state.userType === "user" ? 
+            <FAB small  icon="plus"  animated={true} onPress={() => setDisplayButton(true)} style={styles.fab}></FAB>
+          : 
+          state.userType === "user" ? 
+            <Title>Selecciona una hora para reservar</Title>
+          : 
+            <Title>Ingrese como usuario para reservar</Title>}    
           {showPaymentButton}  
         </View>    
       </ScrollView>

@@ -5,9 +5,11 @@ import LoginForm from '../Login/LoginForm';
 import RegisterForm from '../Register/RegisterForm';
 import Logout from '../Logout/Logout';
 import CourtForm from '../Courts/CourtForm';
-import Home from '../../pages/Home';
 import { AuthContext } from '../../App';
 import  HomeNavigator  from './HomeNavigator';
+import Reservations from '../Profile/Reservations';
+import Profile from '../Profile/Profile';
+import MyCourts from '../Profile/MyCourts';
 
 const Tab = createBottomTabNavigator();
 
@@ -37,9 +39,9 @@ export const NonLoggedTabNavigator = () => {
         inactiveTintColor: 'black',
       }}
     > 
-      <Tab.Screen name="Home" component={HomeNavigator} />
-      <Tab.Screen name="Login" component={LoginForm} />  
-      <Tab.Screen name="Register" component={RegisterForm} />  
+      <Tab.Screen name="Home" component={HomeNavigator} options={{title: "Home"}} />
+      <Tab.Screen name="Login" component={LoginForm} options={{title: "Ingresar"}} />  
+      <Tab.Screen name="Register" component={RegisterForm} options={{title: "Registro"}} />  
     </Tab.Navigator>
   )
 }
@@ -58,6 +60,12 @@ export const LoggedUserTabNavigator = () => {
           } else if (route.name === "Logout"){
             colorIcon = focused ? "#6200EE" : "black"
             iconName = 'logout'
+          } else if (route.name === "Reservations"){
+            colorIcon = focused ? "#6200EE" : "black"
+            iconName = 'format-list-numbered'
+          } else if (route.name === "Profile"){
+            colorIcon = focused ? "#6200EE" : "black"
+            iconName = 'account-circle'
           }
           return <IconButton icon={iconName} color={colorIcon} size={25} />
         },
@@ -67,8 +75,11 @@ export const LoggedUserTabNavigator = () => {
         inactiveTintColor: 'black',
       }}
     >       
-      <Tab.Screen name="Home" component={HomeNavigator} />      
-      <Tab.Screen name="Logout" component={Logout} />
+      <Tab.Screen name="Home" component={HomeNavigator} options={{title: "Home"}} /> 
+      <Tab.Screen name="Reservations" component={Reservations} options={{title: "Reservas"}} />   
+      <Tab.Screen name="Profile" component={Profile} options={{title: "Perfil"}} /> 
+      <Tab.Screen name="Logout" component={Logout} options={{title: "Cerrar Sesión"}} />
+      
     </Tab.Navigator>
   )
 }
@@ -87,9 +98,15 @@ export const LoggedAdminTabNavigator = () => {
           } else if (route.name === "CreateCourt"){
             colorIcon = focused ? "#6200EE" : "black"
             iconName = 'tennis'
+          } else if (route.name === "Profile"){
+            colorIcon = focused ? "#6200EE" : "black"
+            iconName = 'account-circle'
           } else if (route.name === "Logout"){
             colorIcon = focused ? "#6200EE" : "black"
             iconName = 'logout'
+          } else if (route.name === "MyCourts"){
+            colorIcon = focused ? "#6200EE" : "black"
+            iconName = 'soccer-field'
           }
           return <IconButton icon={iconName} color={colorIcon} size={25} />
         },
@@ -99,9 +116,11 @@ export const LoggedAdminTabNavigator = () => {
         inactiveTintColor: 'black',
       }}
     >         
-      <Tab.Screen name="Home" component={HomeNavigator} />  
-      <Tab.Screen name="CreateCourt" component={CourtForm} />    
-      <Tab.Screen name="Logout" component={Logout} />
+      <Tab.Screen name="Home" component={HomeNavigator} options={{title: "Home"}} />  
+      <Tab.Screen name="CreateCourt" component={CourtForm} options={{title: "Crear Espacio"}} />  
+      <Tab.Screen name="MyCourts" component={MyCourts} options={{title: "Mis Espacios"}} /> 
+      <Tab.Screen name="Profile" component={Profile} options={{title: "Perfil"}} />   
+      <Tab.Screen name="Logout" component={Logout} options={{title: "Cerrar sesión"}} />
     </Tab.Navigator>
   )
 }

@@ -33,13 +33,13 @@ const LoginForm = (navigation) => {
       signIn({token, userType})
       await AsyncStorage.setItem('token',token)
       await AsyncStorage.setItem('userType',userType) 
-      showToastWithGravityAndOffset("User Logged Succesfully")  
+      showToastWithGravityAndOffset("Sesión Iniciada")  
       actions.setSubmitting(false)
     } catch(err){
       if (err.response.status === 401) {
-        showToastWithGravityAndOffset("Email or Password are incorrect")
+        showToastWithGravityAndOffset("Email o contraseña incorrectas")
       } else {
-        showToastWithGravityAndOffset("Network Error")  
+        showToastWithGravityAndOffset("Error de Servidor")  
       }   
     }
     
@@ -109,29 +109,29 @@ const LoginForm = (navigation) => {
       <View style={styles.toggleButton}> 
         <ToggleButton.Group onValueChange={value => changeUserType(value)} value={userType}  >
           <View style={styles.buttonUser}>
-          <Title>Login User</Title>
+          <Title>Ingresar Usuario</Title>
           <ToggleButton icon="account" disabled={userType=="user" ? true : false} value="user" />
           </View>
           <View style={styles.buttonAdmin}>
-          <Title>Login Admin</Title>
+          <Title>Ingresar Admin</Title>
           <ToggleButton icon="account-key" disabled={userType=="admin" ? true : false} value="admin" />
           </View>
         </ToggleButton.Group>
       </View> 
       <View style={styles.container}>    
-      <Title style={styles.title}>{`Login ${userType.charAt(0).toUpperCase() + userType.slice(1)}`}</Title>    
+      {userType == "user" ? <Title style={styles.title}>Ingresar Usuario</Title> : <Title style={styles.title}>Ingresar Admin</Title>}   
       
       <Formik
         initialValues={{email: '', password: ''}} 
         onSubmit={handleSubmit} validationSchema={FormSchema} >
-        {({handleChange, handleSubmit, values, errors, isSubmitting}) => (
+        {({handleChange, handleSubmit, handleBlur, values, touched, errors, isSubmitting}) => (
           <>
-            <TextInput label="Email" value={values.email} onChangeText={handleChange('email')}  outlined placeholder="Enter your Email" error={errors.email} style={styles.input} />
-            {errors.email ? <Text>{errors.email}</Text> : null}
-            <TextInput label="Password" value={values.password} onChangeText={handleChange('password')} secureTextEntry={true} error={errors.password} style={styles.input}  />
-            {errors.password ? <Text>{errors.password}</Text> : null}
+            <TextInput label="Email" value={values.email} onChangeText={handleChange('email')} onBlur={handleBlur('email')} outlined placeholder="Ingresa tu email" error={errors.email} style={styles.input} />
+            {touched.email && errors.email ? <Text>{errors.email}</Text> : null}
+            <TextInput label="Contraseña" value={values.password} onChangeText={handleChange('password')} onBlur={handleBlur('password')} secureTextEntry={true} error={errors.password} style={styles.input}  />
+            {touched.password && errors.password ? <Text>{errors.password}</Text> : null}
             {isSubmitting ? spinner : null}
-            <Button icon="send" mode="contained" disabled={isSubmitting} onPress={handleSubmit} style={styles.button}>Submit</Button> 
+            <Button icon="send" mode="contained" disabled={isSubmitting} onPress={handleSubmit} style={styles.button}>Enviar</Button> 
           </>        
         )}
       </Formik>

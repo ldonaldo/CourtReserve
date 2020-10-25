@@ -1,15 +1,13 @@
 import React, {useEffect} from 'react';
-import { ScrollView } from 'react-native';
-import { Title, Text, Button, Card, Paragraph} from 'react-native-paper';
-import AsyncStorage from '@react-native-community/async-storage';
 import { getAllCourts } from '../utils/HTTPRequests';
 import Courts from '../components/Courts/Courts';
 import { AuthContext } from '../App';
+import { useIsFocused } from '@react-navigation/native';
 
 
-export default function Home({navigation}) {
+export default function Home({}) {
   const {state, authContext: {updateCourts} } = React.useContext(AuthContext)
-
+  const isFocused = useIsFocused();
   useEffect(() => {
     async function getCourts() {
       try{
@@ -21,11 +19,11 @@ export default function Home({navigation}) {
       }
     }
     getCourts();
-  },[])
+  },[isFocused])
   
   return(
     <>      
-        <Courts courts={state.courts} />      
+        <Courts courts={state.courts} edit={false} />      
     </>
   )
 }

@@ -6,7 +6,6 @@ import CourtCalendar from '../Courts/CourtCalendar';
 const Stack = createStackNavigator();
 
 const HomeNavigator = ({navigation}) => {
-  console.log(navigation)
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={Home} />
